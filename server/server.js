@@ -4,8 +4,9 @@ let app = express();
 const path = require('path');
 const fs = require('fs');
 const bodyParser = require('body-parser');
+const { nextTick } = require('process');
 
-//creat path for posts.json
+//create path for posts.json
 const postPath = path.join(__dirname, 'posts.json')
 
 //create express server that responds to the root get req
@@ -38,5 +39,29 @@ app.post('/formsubmission', (req, res) => {
    })
     res.send(JSON.stringify(formSubmit));
 });
+
+app.get('/getposts', (req, res, next) => {
+    const allData = JSON.parse(fs.readFileSync(postPath));
+    res.send(allData);
+});
+
+app.get('/singlepost/:id', (req, res, next) => {
+    const id = req.params.id;
+    const allData = JSON.parse(fs.readFileSync(postPath));
+    const individualPost = allData[id];
+    res.send(individualPost);
+})
+
+app.get('/delete/:id', (req, res, next) => {
+    const id = req.params.id;
+    const allData = JSON.parse(fs.readFileSync(postPath));
+    delete allData[id];
+    fs.writeFileSync(postPath, JSON.stringify(allData.filter(x=>x)), (err) => {
+        if (err) console.log(err);
+    });
+    res.send('Your item was deleted')
+})
+
+
 
 app.listen(3000);
