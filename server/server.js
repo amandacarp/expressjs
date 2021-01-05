@@ -25,15 +25,17 @@ app.use(express.static(path.join(__dirname, '../public')));
 //ADVANCED
 app.use(bodyParser.urlencoded({extended: false}));
 
-const parsedForm = []
 
 app.post('/formsubmission', (req, res) => {
     const formSubmit = {
         name: req.body.name,
         email: req.body.email
     }
-    parsedForm.push(formSubmit)
-    fs.appendFileSync(postPath, JSON.stringify(formSubmit));
+   const oldData = JSON.parse(fs.readFileSync(postPath));
+   const newData = [formSubmit, ...oldData];
+   fs.writeFileSync(postPath, JSON.stringify(newData), (err) => {
+       if (err) console.log(err)
+   })
     res.send(JSON.stringify(formSubmit));
 });
 
